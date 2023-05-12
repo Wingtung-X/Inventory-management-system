@@ -3,6 +3,8 @@ package view.login;
 import actionHandler.login.LoginHandler;
 import view.admin.AdminScreen;
 import view.employee.EmployeeScreen;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,15 +46,31 @@ public class LoginView extends JFrame {
         loginButton.addActionListener(e->{
             String inputName = nameInput.getText();
             char[] password = passwordInput.getPassword();
+//            password
             String inputPassword = new String(password);
-            String typeSelected = (String) chooseView.getSelectedItem();
-            LoginHandler loginHandler = new LoginHandler();
-            if (loginHandler.login(inputName,inputPassword,typeSelected) && typeSelected == "admin"){
-                new AdminScreen();
-            }else if (loginHandler.login(inputName,inputPassword,typeSelected) && typeSelected == "employee"){
-                new EmployeeScreen();
-            }else{
-                JOptionPane.showMessageDialog(this,"Invalid user, password or user type.");
+            // Hash input password
+            MessageDigest md = null;
+            try {
+                md = MessageDigest.getInstance("SHA-256");
+                md.update(inputPassword.getBytes());
+                byte[] bytes = md.digest();
+                StringBuilder sb = new StringBuilder();
+                for (byte b : bytes) {
+                    sb.append(String.format("%02x", b));
+                }
+                String hashedPassword = sb.toString();
+
+                String typeSelected = (String) chooseView.getSelectedItem();
+                LoginHandler loginHandler = new LoginHandler();
+                if (loginHandler.login(inputName,inputPassword,typeSelected) && typeSelected == "admin"){
+                    new AdminScreen();
+                }else if (loginHandler.login(inputName,hashedPassword,typeSelected) && typeSelected == "employee"){
+                    new EmployeeScreen();
+                }else{
+                    JOptionPane.showMessageDialog(this,"Invalid user, password or user type.");
+                }
+            } catch (NoSuchAlgorithmException ex) {
+                throw new RuntimeException(ex);
             }
 
         });
@@ -116,4 +134,5 @@ public class LoginView extends JFrame {
         springLayout.putConstraint(SpringLayout.NORTH,signUpButton,0,SpringLayout.NORTH,loginButton);
     }
 }
+
 

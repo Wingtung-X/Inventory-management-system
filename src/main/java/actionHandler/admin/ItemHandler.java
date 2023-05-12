@@ -5,7 +5,8 @@ import data.Item;
 
 import java.util.Vector;
 
-public class ItemHandler {
+public class
+ItemHandler {
     public void addItemHandler(String name, int price, String description){
         ItemDAO itemDAO = new ItemDAO();
         Item addItem = new Item();

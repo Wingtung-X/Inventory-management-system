@@ -5,6 +5,9 @@ import actionHandler.login.SignUpHandler;
 import javax.swing.*;
 import java.awt.*;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class SignUpView extends JFrame {
     private JLabel nameLabel = new JLabel("Username:");
     private JTextField nameInput = new JTextField(20);
@@ -31,12 +34,27 @@ public class SignUpView extends JFrame {
         panel.add(signUpButton);
         signUpButton.addActionListener(e -> {
             String userName = String.valueOf(nameInput.getText());
+
+//            password is here
             String password = String.valueOf(passwordInput.getText());
-            SignUpHandler signUpHandler = new SignUpHandler();
-            if (userName.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this,"Invalid user or password");
-            }else {
-                signUpHandler.signUp(userName, password);
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(password.getBytes());
+                byte[] bytes = md.digest();
+                StringBuilder sb = new StringBuilder();
+                for (byte b : bytes) {
+                    sb.append(String.format("%02x", b));
+                }
+                String hashedPassword = sb.toString();
+                SignUpHandler signUpHandler = new SignUpHandler();
+                if (userName.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,"Invalid user or password");
+                }else {
+//                signUpHandler.signUp(userName, password);
+                    signUpHandler.signUp(userName,hashedPassword);
+                }
+            } catch (NoSuchAlgorithmException ex) {
+                throw new RuntimeException(ex);
             }
 
         });
